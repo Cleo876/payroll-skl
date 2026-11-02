@@ -25,6 +25,7 @@
 15. [Testing in Live Preview & AI Prompt Cheat-Sheet](#section-15-testing-in-live-preview--ai-prompt-cheat-sheet)
 16. [Mobile Responsiveness (Making It Look Like an App)](#section-16-mobile-responsiveness-making-it-look-like-an-app)
 17. [Backend & Database Integration (For the Backend Team)](#section-17-backend--database-integration-for-the-backend-team)
+18. [**NEW!** Global Data Dictionary & Implementation Guide](#section-18-global-data-dictionary--implementation-guide)
 
 ---
 
@@ -190,70 +191,10 @@ Want to put cards side-by-side in a row? Wrap your `<div class="card">` boxes in
 
 KPI Cards are the small summary boxes at the top of the screen (like **Total Employees: 1,248**).
 
-**You never choose a KPI card colour yourself.** Each card picks up its colour automatically from the icon inside it. Change the icon class → the whole card recolours (background tint, top accent bar, border, glowing shadow, big number, and icon circle all change together).
-
-### How to Build a KPI Card (6 lines):
+### How to Build a KPI Card in 6 Lines:
 ```html
-<div class="kpi-card">
-  <div class="kpi-header">
-    <div class="icon-wrapper icon-green">👥</div>
-    <span class="kpi-label">Total Employees</span>
-  </div>
-  <div class="kpi-body">
-    <span class="kpi-value" data-bind="total-employees">1,248</span>
-    <span class="trend-up">+18 vs last month</span>
-  </div>
-</div>
-```
-
-**Plain English Breakdown:**
-* `kpi-card` gives you the coloured summary box. Do **not** also add `class="card"` — `.kpi-card` already brings its own card surface. Combining them is redundant.
-* `icon-green` tells the card to theme itself **green**. This is the only colour control you have — change the icon class and the whole card changes colour.
-* `data-bind="total-employees"` tells our script to replace `1,248` with the real number automatically.
-* `trend-up` makes the trend pill green (use `trend-down` for red, or `kpi-trend neutral` for grey).
-
-### The 7 KPI Card Colours (Just Pick the Icon)
-| Icon class | Card theme | Best used for |
-| :--- | :--- | :--- |
-| `icon-blue` | Blue | Headcount, total employees |
-| `icon-gold` | Amber / gold | Salary cost, money totals |
-| `icon-green` | Green | Net payouts, paid items, positive |
-| `icon-purple` | Purple | Averages, analytics, CTC |
-| `icon-teal` | Teal | Savings, efficiency |
-| `icon-red` | Red | Deductions, alerts, overdue |
-| `icon-pink` | Pink | HR, leave, misc categories |
-
-**That's it — no hex values, no colour codes, no custom CSS.** Pick the icon colour and the card does the rest, keeping every tab visually consistent.
-
-### Optional: Force a Colour on Very Old Browsers
-Modern browsers auto-detect the colour from the icon. If you also need it to work in very old browsers that do not support `:has()`, add the matching `.stat-{colour}` class directly to the card:
-```html
-<div class="kpi-card stat-green">
-```
-
-Same list of names: `stat-blue`, `stat-green`, `stat-gold`, `stat-purple`, `stat-teal`, `stat-red`, `stat-pink`.
-
-### Two Layout Patterns You Can Use
-The card supports both layouts — pick whichever is clearer for you. Both colour themselves identically.
-
-**Pattern A — Header + Body (matches the Dashboard tab):**
-```html
-<div class="kpi-card">
-  <div class="kpi-header">
-    <div class="icon-wrapper icon-blue">👥</div>
-    <span class="kpi-label">Total Employees</span>
-  </div>
-  <div class="kpi-body">
-    <span class="kpi-value" data-bind="total-employees">1,248</span>
-    <span class="trend-up">+18</span>
-  </div>
-</div>
-```
-
-**Pattern B — Icon + Details (more compact, good for narrow grids):**
-```html
-<div class="kpi-card">
-  <div class="icon-wrapper icon-blue">👥</div>
+<div class="card kpi-card">
+  <div class="kpi-icon icon-green">👥</div>
   <div class="kpi-details">
     <span class="kpi-label">Total Employees</span>
     <h2 data-bind="total-employees">1,248</h2>
@@ -261,6 +202,11 @@ The card supports both layouts — pick whichever is clearer for you. Both colou
   <span class="trend-up">+18 vs last month</span>
 </div>
 ```
+
+**Plain English Breakdown:**
+* `icon-green` sets the circle color (you can also use `icon-blue`, `icon-teal`, or `icon-purple`).
+* `data-bind="total-employees"` tells our script to replace `1,248` with the real number of employees automatically.
+* `trend-up` makes the text green (use `trend-down` for red).
 
 ### Status Badges (One Line Only!):
 Drop any of these inside a table or list:
@@ -270,6 +216,8 @@ Drop any of these inside a table or list:
 <span class="badge badge-completed">Completed</span>
 <span class="badge badge-danger">Overdue !</span>
 ```
+
+---
 
 ## Section 8: Master Catalog: All 12 Available Charts & Graphs
 
@@ -632,7 +580,88 @@ set: async function(key, value) {
 }
 ```
 
-### Step 4: Make the Auto-Binder Await the Data
-Because database calls over the internet take a few milliseconds (unlike local storage), the backend developer will just need to add the `async` and `await` keywords to the `bindAllData()` function in `payroll-bridge.js` so it waits for the `get()` function to finish downloading the data before it draws the HTML charts.
+---
 
-By making these small adjustments to the Bridge, **all the `data-bind`, `data-form`, and Charts in the entire application will instantly switch from using sample local data to real database data!**
+## Section 18: Global Data Dictionary & Implementation Guide
+
+When building your tab, you must use the exact variable names below. This guarantees that if Teammate A calculates a tax rate, Teammate B can display it on the Dashboard without writing custom Javascript. 
+
+### How to Implement This in Your HTML
+
+**1. Saving Data (e.g., Onboarding an Employee):**
+The `name` attribute in your `<input>` tags **must** match the keys below. 
+```html
+<form data-form="add-employee">
+  <input type="text" name="emp_firstName" placeholder="First Name">
+  <select name="emp_payCycle">
+    <option value="monthly">Monthly</option>
+    <option value="fortnightly">Fortnightly</option>
+  </select>
+  <input type="number" name="emp_baseRate" placeholder="Base Salary/Rate">
+  <button type="submit" class="btn-primary">Save Employee</button>
+</form>
+```
+
+**2. Displaying Data (e.g., On a Dashboard):**
+To show a global value, use `data-bind="[KEY]"`.
+```html
+<div class="card">
+  <h3>System Overview</h3>
+  <p>Total Active Employees: <strong data-bind="total-employees">0</strong></p>
+  <p>Company Tax Rate (PAYE): <strong data-bind="settings_taxPaye">0</strong>%</p>
+</div>
+```
+
+---
+
+### A. Employee Profile Data Model (`add-employee` form)
+When building the `tab-employees.html` forms, use these `name="..."` attributes.
+
+| Key Name | What it represents | Example Options / Values |
+| :--- | :--- | :--- |
+| `emp_id` | Unique ID (Auto-generated by backend) | "EMP-001" |
+| `emp_firstName` | Employee's First Name | "Jane" |
+| `emp_lastName` | Employee's Last Name | "Doe" |
+| `emp_email` | Professional Contact Email | "jane.doe@company.com" |
+| `emp_phone` | Contact Phone Number | "555-0198" |
+| `emp_department` | Department assigned | "Engineering", "Sales", "HR" |
+| `emp_jobTitle` | Specific Role | "Senior Technician" |
+| `emp_payCycle` | Assigned frequency of pay | "weekly", "fortnightly", "monthly", "contract" |
+| `emp_payBasis` | How their math is calculated | "fixed", "hourly", "daily", "piece" |
+| `emp_baseRate` | Their actual money figure ($) | 120000.00 (Salary) or 2500 (Hourly) |
+| `emp_trn` | Tax Registration Number | "123-456-789" |
+| `emp_bankName` | Bank for direct deposit | "NCB", "Scotiabank" |
+| `emp_accountNum` | Account number | "1234567890" |
+
+### B. Dashboard & Aggregate Totals
+| Key Name | What it represents | Example Value |
+| :--- | :--- | :--- |
+| `total-employees` | Number of active employees | 142 |
+| `total-salary-cost` | Total gross pay for the month | 124000.50 |
+| `net-payout` | Total take-home pay after taxes | 92000.00 |
+| `avg-ctc` | Average cost to company per employee | 873.24 |
+
+### C. Global Settings & Compliance Rates
+*Note: Boolean (true/false) variables are used for checking if a tax is active.*
+
+| Key Name | What it represents | Example Value |
+| :--- | :--- | :--- |
+| `settings_currencySymbol` | The chosen currency symbol | "$" or "J$" |
+| `settings_payCycle` | Default company pay frequency | "monthly" |
+| `settings_taxPaye` | Income Tax Percentage | 25.0 |
+| `settings_enablePaye` | Is Income Tax turned on? | true |
+| `settings_taxNis` | NIS Percentage | 3.0 |
+| `settings_enableNis` | Is NIS turned on? | true |
+| `settings_taxNht` | NHT Percentage | 2.0 |
+| `settings_enableNht` | Is NHT turned on? | true |
+| `settings_taxEd` | Education Tax Percentage | 2.25 |
+| `settings_enableEd` | Is Education Tax turned on? | true |
+
+### D. Advanced Pay Cycle Rules
+| Key Name | What it represents | Example Value |
+| :--- | :--- | :--- |
+| `settings_weeklyBasis` | Math rule for weekly pay | "hourly" |
+| `settings_fortnightlyBasis` | Math rule for fortnightly pay | "fixed" |
+| `settings_monthlyBasis` | Math rule for monthly pay | "fixed" |
+| `settings_contractorBasis` | Math rule for external vendors | "piece" |
+| `settings_contractorTax` | Flat withholding tax for vendors | 10.0 |
