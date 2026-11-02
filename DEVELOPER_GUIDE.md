@@ -583,6 +583,7 @@ set: async function(key, value) {
 ---
 
 ## Section 18: Global Data Dictionary & Implementation Guide
+🚨 PROTOCOL FOR NEW VARIABLES: If your module requires a new data variable that is not on this list, you **cannot** just make it up in your local file. You must first add the variable name and its expected data type to this Global Data Dictionary. If a pull request contains undocumented Bridge variables, it will be rejected.
 
 When building your tab, you must use the exact variable names below. This guarantees that if Teammate A calculates a tax rate, Teammate B can display it on the Dashboard without writing custom Javascript. 
 
