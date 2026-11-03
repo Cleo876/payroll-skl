@@ -26,6 +26,7 @@
 16. [Mobile Responsiveness (Making It Look Like an App)](#section-16-mobile-responsiveness-making-it-look-like-an-app)
 17. [Backend & Database Integration (For the Backend Team)](#section-17-backend--database-integration-for-the-backend-team)
 18. [**NEW!** Global Data Dictionary & Implementation Guide](#section-18-global-data-dictionary--implementation-guide)
+19. [**NEW!** The Global Time Machine Payroll Period](#section-19-the-global-time-machine-payroll-period)
 
 ---
 
@@ -583,7 +584,6 @@ set: async function(key, value) {
 ---
 
 ## Section 18: Global Data Dictionary & Implementation Guide
-🚨 PROTOCOL FOR NEW VARIABLES: If your module requires a new data variable that is not on this list, you **cannot** just make it up in your local file. You must first add the variable name and its expected data type to this Global Data Dictionary. If a pull request contains undocumented Bridge variables, it will be rejected.
 
 When building your tab, you must use the exact variable names below. This guarantees that if Teammate A calculates a tax rate, Teammate B can display it on the Dashboard without writing custom Javascript. 
 
@@ -666,3 +666,34 @@ When building the `tab-employees.html` forms, use these `name="..."` attributes.
 | `settings_monthlyBasis` | Math rule for monthly pay | "fixed" |
 | `settings_contractorBasis` | Math rule for external vendors | "piece" |
 | `settings_contractorTax` | Flat withholding tax for vendors | 10.0 |
+<!-- ... existing code ... -->
+| `settings_contractorBasis` | Math rule for external vendors | "piece" | 
+| `settings_contractorTax` | Flat withholding tax for vendors | 10.0 | 
+
+## Section 19: The Global Time Machine (Payroll Period)
+
+Because payroll is time-sensitive, the main shell has a dropdown at the top right to select the **Active Payroll Period** (e.g., "November 2026"). 
+
+If your tab needs to know which month the user is looking at (for example, filtering an attendance table or printing a payslip), **do not build your own month selector.** Use the global one.
+
+### How to get the current selected month:
+You can ask the parent window for the current period at any time. It returns a string in `YYYY-MM` format (e.g., `"2026-11"`).
+
+```javascript
+// Get the currently selected month
+const currentPeriod = window.parent.payrollPeriod;
+console.log("We are currently viewing:", currentPeriod);
+```
+
+### How to react when the user changes the month:
+If the user changes the dropdown while your tab is open, you can listen for the change and instantly reload your tables or charts.
+
+```javascript
+window.parent.addEventListener('payrollPeriodChanged', (e) => {
+    const newPeriod = e.detail.period; // e.g., "2026-10"
+    console.log("User changed the month to:", newPeriod);
+    
+    // Call your function to reload table data here!
+    // reloadMyTableForMonth(newPeriod);
+});
+```
